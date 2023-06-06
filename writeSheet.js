@@ -12,14 +12,12 @@ async function write(reg, totalStates) {
       let group = groupRowList[rowNum - 6];
       let row = distSheet.getRow(rowNum);
       let data = totalStates[group];
-      row.getCell(11).value = R.pathOr(null, ['营销', 'peopleNum'], data);
-      row.getCell(12).value = R.pathOr(null, ['营销', '22'], data);
-      row.getCell(13).value = R.pathOr(null, ['营销', '20'], data);
-      row.getCell(14).value = R.pathOr(null, ['营销', '33'], data)
-      row.getCell(19).value = R.pathOr(null, ['收展', 'peopleNum'], data);
-      row.getCell(20).value = R.pathOr(null, ['收展', '22'], data)
-      row.getCell(21).value = R.pathOr(null, ['收展', '20'], data);
-      row.getCell(22).value = R.pathOr(null, ['收展', '33'], data);
+      row.getCell(10).value = R.pathOr(null, ['营销', 'peopleNum'], data);
+      row.getCell(11).value = R.pathOr(null, ['营销', '20'], data);
+      row.getCell(12).value = R.pathOr(null, ['营销', '33'], data)
+      row.getCell(17).value = R.pathOr(null, ['收展', 'peopleNum'], data);
+      row.getCell(18).value = R.pathOr(null, ['收展', '20'], data);
+      row.getCell(19).value = R.pathOr(null, ['收展', '33'], data);
     });
     
     await dist.xlsx.writeFile("./dist/工作簿11.xlsx");
