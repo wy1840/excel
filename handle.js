@@ -30,14 +30,17 @@ let countState = input => {
             finishedNum += state[channel][33];
             state[channel]['22'] = countByPathEq(channelValue);
             state[channel]['peopleNum'] = countByIdt(channelValue);
+            state[channel]['notch'] = state[channel]['peopleNum'] - state[channel][33]; 
         })(groupValue);
         state['peopleNum'] = peopleNum;
         state['finishedNum'] = finishedNum;
+	    state['notch'] = peopleNum - finishedNum;
         state['percent'] = round(finishedNum/peopleNum*100, 1);
     })(input);
-    let charts = R.sort(R.descend(R.prop(1)),R.toPairs(R.mapObjIndexed((value, key, obj) => value.percent)(result)))
+    let charts = R.sort(R.descend(R.prop(1)),R.toPairs(R.mapObjIndexed((value, key, obj) => value.percent)(result)));
     let finishedNum = R.sum(R.pluck('finishedNum', R.values(result)));
     let peopleNum = R.sum(R.pluck('peopleNum', R.values(result)));
+    result['notchCharts'] = R.sort(R.descend(R.prop(1)), R.toPairs(R.mapObjIndexed((value, key, obj) => value.notch)(result)));
     result['finishedNum'] = finishedNum;
     result['peopleNum'] = peopleNum;
     result['percent'] = round(finishedNum/peopleNum*100, 1);
