@@ -57,6 +57,17 @@ let countState = input => {
     return result;
 };
 
+function pickFormatInfo(counted) {
+    let notiFormatKeys = R.pick(['month', 'day', 'finishedNum', 'peopleNum', 'percent', 'group0', 'group1', 'group2', 
+                    'group0-percent', 'group1-percent', 'group2-percent', 'group-3', 'group-2', 'group-1'])(counted);
+    let deduFormatKeys = R.range(0, 14).map(idx => ['group{%}', 'group{%}-num', 'group{%}-money'].map(key => key.replace('{%}', idx)));
+    deduFormatKeys = R.mergeAll(counted.notchCharts.map(group => R.zipObj(deduFormatKeys.shift(), group.concat([group[1] * 100]))));
+    deduFormatKeys.groupNumTol = R.sum(R.values(R.pickBy((value, key) => key.endsWith('num'), deduFormatKeys)));
+    deduFormatKeys.groupMoneyTol = R.sum(R.values(R.pickBy((value, key) => key.endsWith('money'), deduFormatKeys)));
+    return {notiFormatKeys, deduFormatKeys};
+
+}
+
 function round(number, precision) {
     return Math.round(+number + 'e' + precision) / Math.pow(10, precision);
     //same as:
@@ -65,5 +76,6 @@ function round(number, precision) {
 
 module.exports = {
     groupByList,
-    countState
+    countState,
+    pickFormatInfo
 }
