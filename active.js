@@ -26,7 +26,7 @@ async function readPersonInfo(scores) {
   let data = await getSourceData('./assets/各单位6月导师活跃度.xlsx', 1);
   let personInfos = R.pipe(
     rowsToArr,
-    R.project([1, 2, 3, 6, 15]),
+    R.project([1, 2, 3, 6, 10]),
     R.map(info => {
       let score = scores[info[2]];
       info['17'] = score ? score : 0;
@@ -44,7 +44,7 @@ function total(personInfos) {
   )(personInfos);
   let byActive = R.propEq('18', 'y');
   let byScoreLte10 = R.propEq('17', 10);
-  let bySupervisor = R.pipe(R.prop('15'), R.test(/主管/));
+  let bySupervisor = R.pipe(R.prop('10'), R.test(/主管/));
   let result = R.map(val => {
     let total = Object.create(null);
     total['peopleNum'] = val.length;
@@ -68,12 +68,22 @@ function getDiff(personInfos, inputData) {
   return { addGroups, addActiveList}
 }
 
+async function copySheet(sourceFilePath, sourceSheetIdx, targetSheet) {
+  let wb = new Excel.Workbook();
+  await wb.xlsx.readFile(sourceFilePath);
+  let sh = wb.worksheets[sourceSheetIdx];
+  let rows = sh.getRows(0, sh.rowCount + 1);
+  rows.forEach((row, idx) => 
+                  row.values.forEach(
+                    (val, colIdx) => targetSheet.getRow(idx).getCell(colIdx).value = val));
+}
+
 async function writeExcel(result, addGroups, personInfos, addActiveList) {
   let wb = new Excel.Workbook()
   await wb.xlsx.readFile('./assets/各单位6月导师活跃度.xlsx')
   let sh1 = wb.worksheets[0];
   let sh2 = wb.worksheets[1];
-  let sh3 = wb.worksheets[6];
+  let sh3 = wb.worksheets[4];
   let colNo = sh1.getColumn(2).values.slice(5, 5 + 14)
   colNo.forEach((val, idx) => {
     let row = sh1.getRow(idx + 5);
@@ -93,6 +103,8 @@ async function writeExcel(result, addGroups, personInfos, addActiveList) {
     row.getCell(9).value = data['18'] === 'y' ? '是' : '否';
   })
   sh3.getColumn(1).values = addActiveList.map(val => val[1] + val[3]);
+  await copySheet('./assets/讲师课时积分明细.xlsx', 0, wb.worksheets[2]);
+  await copySheet('./assets/讲师积分汇总.xlsx', 0, wb.worksheets[3]);
   await wb.xlsx.writeFile('./dist/active.xlsx');
 }
 
@@ -104,6 +116,7 @@ async function run() {
   let result = total(personInfos);
   await writeFile(resolve('./data/data.json'), new Uint8Array(Buffer.from(JSON.stringify({ personInfos }))));
   let { addActiveList, addGroups } = getDiff(personInfos, previowData);
+  await writeFile(resolve('./data/previous.txt'), new Uint8Array(Buffer.from(addActiveList.map(R.pipe(R.props([1,3]), R.join(''))).join('\n')))); 
   await writeExcel(result, addGroups, personInfos, addActiveList);
 }
 
