@@ -9,12 +9,6 @@ let month = argv[3];
 
 let checkKeys = ['offerName', 'userName', 'firstName', 'courseName', 'star', 'teachingPeriod', 'allowanceStandard', 'allowance'];
 
-let withoutRead = (stream) =>
-    // Respond with our stream
-    new Response(stream, { headers: { 'Content-Type': 'application/json' } }).json()
-
-let getContent = R.pipe(R.prop('body'), withoutRead, R.prop('content'));
-
 let courseListUrl = "https://elearning.e-chinalife.com/api/teacher/audit/getManagementOfferCheckDetailsList?type=&courseName=&offerName=&userGroupId=98202&year=2023&month=" + month + "&flag=Y&size=50&page=0";
 
 let allowanceUrl = offerId => "https://elearning.e-chinalife.com/api/teacher/audit/getManagementOfferTeacherCheckDetailsList?channel=&userName=&firstName=&type=&year=2023&month=" + month + "&flg=&offerId=" + offerId;
@@ -49,13 +43,11 @@ function write(filePath, data) {
 
 async function run() {
   let requestList = await fetch(courseListUrl, options)
-                               .then(R.prop('body'))
-                               .then(withoutRead)
+                               .then(res => res.json())
                                .then(R.prop('content'))
                                .then(R.pluck('offerId'))
                                .then(courseIdList => courseIdList.map(id => fetch(allowanceUrl(id), options)
-                                                      .then(R.prop('body'))
-                                                      .then(withoutRead)
+                                                      .then(res => res.json())
                                                       .then(R.prop('content'))
                                                       .then(R.project(checkKeys))));
   let allowanceList = await Promise.all(requestList).then(R.flatten);
