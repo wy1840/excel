@@ -4,8 +4,6 @@ const {argv} = require('node:process');
 
 let cookie = argv[2];
 
-console.log(cookie)
-
 let options = {
     "headers": {
       "accept": "application/json, text/plain, */*",
@@ -67,7 +65,7 @@ let options = {
                   .then(getPickInfo)
                   .then(transToChinese)
                   .then(tran => {
-                    writeFile('./data/classList.json', new Uint8Array(Buffer.from(JSON.stringify(tran))), err => {
+                    writeFile('../../data/classList.json', new Uint8Array(Buffer.from(JSON.stringify(tran))), err => {
                       if (err) throw err;
                       console.log('finished');
                     })
